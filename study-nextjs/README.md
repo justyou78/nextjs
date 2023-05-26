@@ -86,3 +86,17 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
 
 - Soft Navigation 조건
   - 1. 내비게이팅이 이루어진 경로가 prefetch된 상태고, 동적 segments를 포함하지 않거나, 현재 경로와 동일한 동적 매개 변수를 가지는 경우
+
+### Route Groups
+
+- Convention: (folderName)
+
+- Define: URL 구조에 영향을 주지 않고 route를 구성한다.
+
+  - Ex. (marketing) -> abount -> page.js의 url은 _/about_
+
+- multiple root layouts: top-level에 layout.js를 제거하고 route group 내부에 여러 layout.js를 추가한다.
+
+- Warning:
+  - Navigating across multiple root layouts will cause a full page load (as opposed to a client-side navigation). For example, navigating from /cart that uses app/(shop)/layout.js to /blog that uses app/(marketing)/layout.js will cause a full page load. This only applies to multiple root layouts.
+  - (marketing)/about/page.js and (shop)/about/page.js would both resolve to /about and cause an error.
