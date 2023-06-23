@@ -177,40 +177,72 @@ export default function RootLayout({ children }) {
 }
 ```
 
-### Page 파일
+### Defining Routes
 
-- .js, .jsx, .tsx 확장자는 페이지로 사용될 수 있다.
+#### 경로 생성
 
+- 폴더는 라우트 경로에 기반되어 구성한다.
+  - Ex URL: acme.com/dashboard/settings => Folder: app/dashboard/settings/page.tsx를 참조하여 페이지를 구성한다.
+
+### Pages and Layouts
+
+#### Page 파일
+
+- 파일은 tsx, jsx, js가 사용될 수 있다.
+- page 파일이 없으면 사용자는 접근할 수 없다.
+- page 파일은 오직 하나만 정의한다.
 - 페이지는 기본적으로 서버 컴포넌트이다.
+- 페이지 파일은 route subtree의 leaf여야 한다.
 
-### Layout 파일
+#### Layout 파일
 
 - 최상위 레이아웃 파일을 "Root Layout"이라고 부른다.
-  루트 레이아웃은 html과 body 태그를 포함한다.
-
+  - 루트 레이아웃은 html과 body 태그를 포함한다.
 - 어떤한 라우트 세크먼트든 경우에따라서 자신이 소유된 레아이아웃을 규정할 수 있다.
   이 레이아웃은 세그먼트 내부의 모든 페이지에 공유된다.
-
 - 공유된 레이아웃 내부와 외부의 특정 라우트 세그먼트를 선택하기 위해 Route Groups를 사용할 수 있다.
-
 - 레이아웃은 기본적으로 서버 컴포넌트이다.
-
-- 상위 레이아웃과 해당 하위 레이아웃 간에 데이터를 전달할 수 없습니다. 그러나 경로에서 동일한 데이터를 두 번 이상 가져올 수 있으며 React는 성능에 영향을 주지 않고 요청을 자동으로 중복 제거합니다.
+- 상위 레이아웃과 해당 하위 레이아웃 간에 데이터를 전달할 수 없습니다.
+- 경로에서 동일한 데이터를 두 번 이상 가져올 경우, 성능에 영향을 주지 않고 요청을 자동으로 중복 제거합니다.
+- 네비게이션 과정에서 상태 및 상호작용이 유지되며 리랜더링되지 않는다.
 
 - Layout은 현재 route segment에 접근을 가질 수 없습니다. route segments를 접근하기 위해선 Client Component 내부에서 useSelectedLayoutSegment, useSelectedLayoutSegments를 사용해야합니다.
 
 - .js, .jsx, .tsx 확장자는 페이지로 사용될 수 있다.
 
-### Templates 파일
+#### Root Layout (Required)
+
+- 최상위(app) 폴더에 위치한 layout 파일을 일컫는다.
+- 필수적으로 존재해야한다.
+- html, body 태그를 규정해야한다. (Next.js는 자동으로 해당 태그를 생성하지 않는다.)
+- head 태그를 관리하기 위해서 **built-in SEO support**를 이용할 수 있다.
+- 여러 root layouts을 생성하기 위해서 **route groups**을 사용할 수 있다.
+- 기본적으로 서버 컴포넌트이다.
+
+#### Templates 파일
 
 - Templates는 layouts과 유사하게 각각 자식 layout 혹은 page를 감쌉니다.
-
-- 템플릿은 탐색 시, 각 자식에 대해 새 인스턴스를 만듭니다. (layout처럼 경로간에 유지되고 상태가 유지되지 않는다. )
-
+- 경로에 결처 지속되고 상태를 유지하는 Layouts과 다르게 Templates는 navigation 중에 새로운 인스턴스를 생성합니다.
 - 사용사례
   - css 혹은 애니메이션 라이브러리를 사용하여 애니메이션 시작 및 종료할 때
   - useEffect와 useState에 의존하는 기능들 (e.g a per-page feedback form)
   - layouts 내부 Suspense Boundaries는 레이아웃으 로드되고 페이지가 변경되지 않을때 한번 fallback을 보여준다. 템플릿에서 fallback은 각 navigation 마다 표시된다.
+
+#### Modifying `<head>`
+
+- import Metadata types and export metadata in Page or Layout file
+- 매뉴얼적으로 <head> 및 
+```
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Next.js',
+}
+
+export default function Page() {
+  return '...'
+}
+```
 
 ### Linking and Navigating
 

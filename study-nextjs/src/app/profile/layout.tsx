@@ -8,8 +8,8 @@ export default function ProfileLayout({
   return (
     <section>
       {/* Include shared UI here e.g. a header or sidebar */}
-      <nav>hello</nav>
-      <Link href={'/profile/subprofile'}>profile</Link>
+      <nav>profile layout</nav>
+      <Link href={'/profile/subprofile'}>subprofile link</Link>
       {children}
     </section>
   );
