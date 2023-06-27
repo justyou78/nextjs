@@ -231,7 +231,8 @@ export default function RootLayout({ children }) {
 #### Modifying `<head>`
 
 - import Metadata types and export metadata in Page or Layout file
-- 매뉴얼적으로 <head> 및 
+- 매뉴얼적으로 <head> 및
+
 ```
 import { Metadata } from 'next'
 
@@ -275,24 +276,57 @@ export default function Page() {
   - Navigating across multiple root layouts will cause a full page load (as opposed to a client-side navigation). For example, navigating from /cart that uses app/(shop)/layout.js to /blog that uses app/(marketing)/layout.js will cause a full page load. This only applies to multiple root layouts.
   - (marketing)/about/page.js and (shop)/about/page.js would both resolve to /about and cause an error.
 
-
 ### Intercepting Routes
 
 - 현재 페이지 컨텍스트를 유지하면서 현재 레이아웃 안의 route를 불러오는 기능.
-    - 예를들어서 피드의 사진을 클릭했을 때, 사진과 함께 피드를 오버레이하여 표시할 때 사용한다.
-        - /feed 경로를 인터센트하고, 대신에 /photo/123을 보여주도록 URL을 가린다.
-    - 하지만 사진 URL로 직접 이동하거나, 페이지를 새로고침할 경우, 전체 사진 페이지가 모달 대신 랜더링된다.
-        - 경로 인터센트가 발생하지 않는다.
+
+  - 예를들어서 피드의 사진을 클릭했을 때, 사진과 함께 피드를 오버레이하여 표시할 때 사용한다.
+    - /feed 경로를 인터센트하고, 대신에 /photo/123을 보여주도록 URL을 가린다.
+  - 하지만 사진 URL로 직접 이동하거나, 페이지를 새로고침할 경우, 전체 사진 페이지가 모달 대신 랜더링된다.
+    - 경로 인터센트가 발생하지 않는다.
 
 - 규칙 (..)
-    - (.) to match segments on the same level
-    - (..) to match segments one level above
-    - (..)(..) to match segments two levels above
-    - (...) to match segments from the root app directory
+
+  - (.) to match segments on the same level
+  - (..) to match segments one level above
+  - (..)(..) to match segments two levels above
+  - (...) to match segments from the root app directory
 
 - 주의사항
-    - (..) 규칙은 파일 시스템이 아닌, route 경로를 기반으로 합니다.
-    
+  - (..) 규칙은 파일 시스템이 아닌, route 경로를 기반으로 합니다.
 
+## Static and Dynamic
 
+- 스태틱 경로 내부 컴포넌트틑 빌드 과정에서 서버에서 랜도된다. 작업 결과는 캐쉬되고, 지속적이 요청으로부터 재사용된다.
+- 동적 경로 내부 컴포넌트는 요청 시, 서버에서 랜더링된다.
 
+### Static Rendering (Default)
+
+- 기본적으로 Next.js는 성능 개선을 위해서 정적으로 경로들을 랜더링한다. 이것은 랜더링 작업이 사전에 일어나고, 지리적으로 사용자에게 가까운 CDN으로부터 제공될 수 있습니다.
+
+### Static Data Fetching (Default)
+
+- 기본적으로 Next.js는 fetch() 요청 결과를 캐쉬합니다. (캐쉬 작업을 특별히 제거하지 않은 요청만)
+
+  - 이것은 캐쉬 옵션을 따로 설정하지 않은 fetch 요청들은 force-cache 옵션을 사용할 것입니다.
+
+- 만약에 경로에 revalidate 옵션을 사용하는 fetch 요청을 한다면 경로는 revalidation 동안 다시 정적으로 랜더링될 것입니다.
+
+### Dynamic Rendering
+
+- 정적 랜더랑 과정에서 만약 **동적 함수 혹은 동적 fetch 요청(no cache)** 이 발견된다면 Next.js는 요청 타임에 경로 전대를 동적으로 랜더링하도록 변경한다.
+
+### Dynamic Functions
+
+- 서버 컴포넌트에서 `cookies()`, `headers()` 사용하는 것은 요청 타입에 전체 경로를 동적 랜더링으로 선택합니다.
+
+- 클라이언트 컴포넌트 내부 `useSearchParams()`를 사용하는 것은 static rendering을 생락하고, 클라이언트에서 가장 가까운 부모 Suspense 까지 모든 클라이언트 컴포넌트를 랜더링합니다.
+  - `useSearchParams()` 사용하는 클라이언트 컴포넌트는 `<Suspense/>`로 바운더리로 감싸는 것을 권장한다.
+    - 이것은 상위 클라이언트 컴포넌트를 정적으로 랜더링하도록할 수 있다.
+- `searchParams` 페이지를 사용하는 것은 요청 타임에 페이지를 동적으로 랜더링하도록 선택합니다.
+
+### Dynamic Data Fetching
+
+- 캐시 옵션을 `no-store` `revalidate` to `0`로 설정하면 동적 데이터 페치를 발생시키낟.
+
+- layout과 page에서 모든 fetch 요청들을 캐쉬하는 옵션은 `segment config` 오브젝트를 사용해서 설정될 수 있다.
