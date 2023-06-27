@@ -274,3 +274,25 @@ export default function Page() {
 - Warning:
   - Navigating across multiple root layouts will cause a full page load (as opposed to a client-side navigation). For example, navigating from /cart that uses app/(shop)/layout.js to /blog that uses app/(marketing)/layout.js will cause a full page load. This only applies to multiple root layouts.
   - (marketing)/about/page.js and (shop)/about/page.js would both resolve to /about and cause an error.
+
+
+### Intercepting Routes
+
+- 현재 페이지 컨텍스트를 유지하면서 현재 레이아웃 안의 route를 불러오는 기능.
+    - 예를들어서 피드의 사진을 클릭했을 때, 사진과 함께 피드를 오버레이하여 표시할 때 사용한다.
+        - /feed 경로를 인터센트하고, 대신에 /photo/123을 보여주도록 URL을 가린다.
+    - 하지만 사진 URL로 직접 이동하거나, 페이지를 새로고침할 경우, 전체 사진 페이지가 모달 대신 랜더링된다.
+        - 경로 인터센트가 발생하지 않는다.
+
+- 규칙 (..)
+    - (.) to match segments on the same level
+    - (..) to match segments one level above
+    - (..)(..) to match segments two levels above
+    - (...) to match segments from the root app directory
+
+- 주의사항
+    - (..) 규칙은 파일 시스템이 아닌, route 경로를 기반으로 합니다.
+    
+
+
+
