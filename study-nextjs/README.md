@@ -330,3 +330,53 @@ export default function Page() {
 - 캐시 옵션을 `no-store` `revalidate` to `0`로 설정하면 동적 데이터 페치를 발생시키낟.
 
 - layout과 page에서 모든 fetch 요청들을 캐쉬하는 옵션은 `segment config` 오브젝트를 사용해서 설정될 수 있다.
+
+## Edge and Node.js Runtimes
+
+- Next.js 는 두개의 서버 런타임을 가진다.
+    - Node.js Runtime
+    - Edge Runtime
+
+- app 디렉토리는 기본값으로 Node.js 런타임을 사용한다.
+
+### Edge Runtime
+
+- 작고 심플한 함수를 가지는 적은 지연시간인 동적이고 맞춤화된 컨텐츠를 전달하기에 이상적인 runtime이다.
+ - Vercel에서 Edge Runtime에서 실핸되는 코드는 1MB 에서 4MB 사이를 초과하지 않는다.
+    - 이 제한선은 임포트된 패키미 및 폰트 파일 그리도 다양한 개발 인프라를 포함한다.
+
+- 참고: Vercel: Next.js 개발팀에서 만든 프론트엔드 호스팅 사이트.
+
+### Node.js Runtime
+
+- Node.js Runtime을 사용하면 모든 Node.js API, npm packages를 사용할 수 있다.
+
+- Edge 런타임을 사용하는 만큼 route 시작 속도가 빠르지 않습니다.
+
+- Node.js 서버로 Next.js를 배포하는 것은 인프라의 managing, scaling, configuring을 필요로 할 것입니다.
+
+### Serverless Node.js
+
+- Edge Runtime 보다 더 복잡한 계산 부하를 처리할 수 있는 확장 가능한 솔루션이 필요할 때, 이상적이다.
+
+- Vercel에 Serverless Functions와 함께하면 전체 코드 사이즈는 모든 packages, fonts, files포함하여 50MB이다.
+
+- Edge를 사용하는 경로에 비해 단점은 Serverless Functions가 요청 처리를 시작하기 전에 부팅하는 데 수백 밀리초가 걸릴 수 있다.
+
+### Segment Runtime Option
+
+- runtime을 규저하기 위해서 다음과 같이 규정한다.
+
+- app/page.tsx
+```
+export const runtime = 'edge' // 'nodejs' (default)
+```
+
+
+
+
+
+
+
+
+
