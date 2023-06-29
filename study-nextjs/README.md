@@ -372,6 +372,77 @@ export default function Page() {
 export const runtime = 'edge' // 'nodejs' (default)
 ```
 
+## Data Fetching
+
+- Next.js는 async와 await로 함수를 기록함으로써 데이터를 직접 패치할 수 있습니다.
+
+- Data fetching은 fet() Web API와 React Server Component 위에서 구축됩니다.
+    - 중복된 요청은 자동으로 제거됩니다.
+
+- Next.js는 각 요청에 caching, revalidating을 설정할 수 있도록 fetch options object를 확장합니다.
+
+```
+async function getData() {
+  const res = await fetch('https://api.example.com/...')
+  // The return value is *not* serialized
+  // You can return Date, Map, Set, etc.
+ 
+  // Recommendation: handle errors
+  if (!res.ok) {
+    // This will activate the closest `error.js` Error Boundary
+    throw new Error('Failed to fetch data')
+  }
+ 
+  return res.json()
+}
+ 
+export default async function Page() {
+  const data = await getData()
+ 
+  return <main></main>
+}
+```
+- async Server Component를 TypeScript와 함께 사용하기 위해서 TypeScript는 5.1.3 혹은 높은 버전과 @types/react 18.2.8보다 높은 버전을 사용해야합니다.
+
+- Next.js는 `cookies()`, `headers()` 함수를 제공합니다.
+
+### use in Client Components
+
+- `use`는 await와 비슷한 개념으로 promise를 받는 새로운 React 함수입니다.
+
+- `use`는 리턴된 promise를 다룹니다. [use RFC](https://github.com/acdlite/rfcs/blob/first-class-promises/text/0000-first-class-support-for-promises.md#usepromise).
+
+
+- `use` 내부에 fetch를 감싸는 것은 Client Components에서 권장되지 않습니다. 만약 fetch가 필요하다면 SWR, React Query third-party 사용을 권장합니다.
+
+### Static Data Fetching
+
+- 기본값으로 fetch는 자동으로 fetch하고 무기한으로 데이터를 캐시합니다.
+
+- 시간 간격으로 캐시된 데이터를 revalidate하기 위해서 next.revalidate 옵션을 사용합니다.
+```
+fetch('https://...', { next: { revalidate: 10 } })
+```
+
+### Dynamic Data Fetching
+
+- 매번 fetch 요청에서 fresh data를 패치하기 위해서 `cache: 'no-store'` 옵션을 사용합니다.
+```
+fetch('https://...', { cache: 'no-store' })
+```
+
+### Default Caching Behavior
+
+- 만약 fetch를 사용하지 않고 다른 third party libraries를 사용한다면 route segment에 따라서 static or dynamic으로 cache여부가 결정됩니다.
+
+- 만약 segment가 static이라면 요청 결괴는 캐쉬되고, 만약 설정했다면 revalidated될 것입니다.
+- 만약 segment가 동적이라면 요청 결괴는 캐쉬도지 않으며 매요청마다 리패치될 것입니다.
+
+- `cookies()`와 `header()`와 같은 동적 함수는 route segment를 동적으로 만듭니다.
+
+
+
+
 
 
 
