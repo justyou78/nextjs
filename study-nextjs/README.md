@@ -334,16 +334,18 @@ export default function Page() {
 ## Edge and Node.js Runtimes
 
 - Next.js 는 두개의 서버 런타임을 가진다.
-    - Node.js Runtime
-    - Edge Runtime
+
+  - Node.js Runtime
+  - Edge Runtime
 
 - app 디렉토리는 기본값으로 Node.js 런타임을 사용한다.
 
 ### Edge Runtime
 
 - 작고 심플한 함수를 가지는 적은 지연시간인 동적이고 맞춤화된 컨텐츠를 전달하기에 이상적인 runtime이다.
- - Vercel에서 Edge Runtime에서 실핸되는 코드는 1MB 에서 4MB 사이를 초과하지 않는다.
-    - 이 제한선은 임포트된 패키미 및 폰트 파일 그리도 다양한 개발 인프라를 포함한다.
+- Vercel에서 Edge Runtime에서 실핸되는 코드는 1MB 에서 4MB 사이를 초과하지 않는다.
+
+  - 이 제한선은 임포트된 패키미 및 폰트 파일 그리도 다양한 개발 인프라를 포함한다.
 
 - 참고: Vercel: Next.js 개발팀에서 만든 프론트엔드 호스팅 사이트.
 
@@ -368,16 +370,20 @@ export default function Page() {
 - runtime을 규저하기 위해서 다음과 같이 규정한다.
 
 - app/page.tsx
+
 ```
 export const runtime = 'edge' // 'nodejs' (default)
 ```
 
 ## Data Fetching
 
+### Fetching
+
 - Next.js는 async와 await로 함수를 기록함으로써 데이터를 직접 패치할 수 있습니다.
 
 - Data fetching은 fet() Web API와 React Server Component 위에서 구축됩니다.
-    - 중복된 요청은 자동으로 제거됩니다.
+
+  - 중복된 요청은 자동으로 제거됩니다.
 
 - Next.js는 각 요청에 caching, revalidating을 설정할 수 있도록 fetch options object를 확장합니다.
 
@@ -386,40 +392,41 @@ async function getData() {
   const res = await fetch('https://api.example.com/...')
   // The return value is *not* serialized
   // You can return Date, Map, Set, etc.
- 
+
   // Recommendation: handle errors
   if (!res.ok) {
     // This will activate the closest `error.js` Error Boundary
     throw new Error('Failed to fetch data')
   }
- 
+
   return res.json()
 }
- 
+
 export default async function Page() {
   const data = await getData()
- 
+
   return <main></main>
 }
 ```
+
 - async Server Component를 TypeScript와 함께 사용하기 위해서 TypeScript는 5.1.3 혹은 높은 버전과 @types/react 18.2.8보다 높은 버전을 사용해야합니다.
 
 - Next.js는 `cookies()`, `headers()` 함수를 제공합니다.
 
-### use in Client Components
+#### use in Client Components
 
 - `use`는 await와 비슷한 개념으로 promise를 받는 새로운 React 함수입니다.
 
 - `use`는 리턴된 promise를 다룹니다. [use RFC](https://github.com/acdlite/rfcs/blob/first-class-promises/text/0000-first-class-support-for-promises.md#usepromise).
 
-
 - `use` 내부에 fetch를 감싸는 것은 Client Components에서 권장되지 않습니다. 만약 fetch가 필요하다면 SWR, React Query third-party 사용을 권장합니다.
 
-### Static Data Fetching
+#### Static Data Fetching
 
 - 기본값으로 fetch는 자동으로 fetch하고 무기한으로 데이터를 캐시합니다.
 
 - 시간 간격으로 캐시된 데이터를 revalidate하기 위해서 next.revalidate 옵션을 사용합니다.
+
 ```
 fetch('https://...', { next: { revalidate: 10 } })
 ```
@@ -427,6 +434,7 @@ fetch('https://...', { next: { revalidate: 10 } })
 ### Dynamic Data Fetching
 
 - 매번 fetch 요청에서 fresh data를 패치하기 위해서 `cache: 'no-store'` 옵션을 사용합니다.
+
 ```
 fetch('https://...', { cache: 'no-store' })
 ```
@@ -440,14 +448,78 @@ fetch('https://...', { cache: 'no-store' })
 
 - `cookies()`와 `header()`와 같은 동적 함수는 route segment를 동적으로 만듭니다.
 
+### Caching
 
+#### fetch()
 
+- fetch를 사용하는 모든 요청들은 자동으로 캐쉬되고 중복이 제거됩니다.
+  - 만약 동적 methods(`next/headers`, `export const POST`)가 사용E되고 fetch가 **POST (use Authorization or cookie header)**요청 이라면 캐시되지 않습니다.
+  - `fetchCache`는 cache를 스킵하도록 규정됩니다.
+  - 각 패치에`revalidate: 0` or `cache: no-store`가 규정된 경우
 
+#### React cache()
 
+- cache()는 중복을 제거하고 함수 호추로 감싸진 결괴를 memoizing합니다. 동일한 arguments로 호출된 함수는 캐쉬된 값을 재사용합니다.
 
+```
+import { cache } from 'react'
 
+export const getUser = cache(async (id: string) => {
+  const user = await db.user.findUnique({ id })
+  return user
+})
+```
 
+- 데이터의 중복이 자동으로 제거되기 때문에, 조회된 데이터를 props로 전달하지 않고, 동일 데이터를 각 컴포넌트에서 fetch하는 것을 권장합니다.
 
+- client에서 절대 사용되지 안ㄷ호록 `server-only packge`사용을 권장합니다.
 
+### POST request and cache()
 
+- 위 post 요청에서 중복이 제거되지 않는 경우일 경우, cache 함수를 사용해서 중복을 제거할 수 있습니다.
 
+```
+import { cache } from 'react'
+
+export const getUser = cache(async (id: string) => {
+  const res = await fetch('...', { method: 'POST', body: '...' })
+  // ...
+})
+```
+
+### Preload pattern with cache()
+
+- 정의: preload로 선언된 데이터를 우선적으로 서버에서 클라이언트로 로드한다.
+
+- 사용 방법
+
+```
+import { getUser } from '@utils/getUser'
+
+export const preload = (id: string) => {
+  // void evaluates the given expression and returns undefined
+  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/void
+  void getUser(id)
+}
+export default async function User({ id }: { id: string }) {
+  const result = await getUser(id)
+  // ...
+}
+```
+
+- preload 함수의 이름은 어느것이든 될 수 있다.
+
+- cache, preload, server-only 함께 사용하기.
+
+```
+import { cache } from 'react'
+import 'server-only'
+
+export const preload = (id: string) => {
+  void getUser(id)
+}
+
+export const getUser = cache(async (id: string) => {
+  // ...
+})
+```
