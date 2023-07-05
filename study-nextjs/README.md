@@ -523,3 +523,60 @@ export const getUser = cache(async (id: string) => {
   // ...
 })
 ```
+
+## Revalidating Data
+
+- 전체 사이트를 리빌드할 필요 없이 특정 정적 routes를 업데이트합니다.
+
+  - Incremental Static Regeneration으로 알려진 기능.
+
+- revalidation은 두 가지 타입이 존재한다.
+  - 1. Background 특정 시간 간견으로 데이터를 revalidate
+  - 2. update 같은 이벤트에 기반하여 데이터를 revalidate
+
+### Background Revalidation
+
+- 특정 간격으로 캐시된 데이터를 revalidate하기 위하여 next.revalidate 옵션을 사용할 수 있따.
+
+```
+fetch('https://...', { next: { revalidate: 60 } })
+```
+
+- fetch를 사용하지 않는 데이터를 revalidate하기 원한다면 route segment config를 사용할 수 있다.
+
+```
+export const revalidate = 60 // revalidate this page every 60 seconds
+```
+
+### On-demand Revalidation
+
+- Next.js는 경로 및 캐시 태그에 기반하여 수요에 따라 컨텐트를 revalidating 합니다.
+
+- cache tag 예시
+
+```
+export default async function Page() {
+  const res = await fetch('https://...', { next: { tags: ['collection'] } })
+  const data = await res.json()
+  // ...
+}
+```
+
+- 위 캐시된 데이터는 Route Handler 내부의 revalidateTag를 호출하면서 수요에 따라 revalidate 됩니다.
+
+```
+import { NextRequest, NextResponse } from 'next/server'
+import { revalidateTag } from 'next/cache'
+
+export async function GET(request: NextRequest) {
+  const tag = request.nextUrl.searchParams.get('tag')
+  revalidateTag(tag)
+  return NextResponse.json({ revalidated: true, now: Date.now() })
+}
+```
+
+### Error Handling and Revalidation
+
+- data revalidate 시도 중에 에러가 발생할 경우, 마지막으로 성공했던 생성된 데이터가 캐쉬로부터 제공됩니다.
+
+- 추후 요청 과정에서 Next.js는 데이터 재요청을 시도할 것입니다.
