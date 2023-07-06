@@ -580,3 +580,87 @@ export async function GET(request: NextRequest) {
 - data revalidate 시도 중에 에러가 발생할 경우, 마지막으로 성공했던 생성된 데이터가 캐쉬로부터 제공됩니다.
 
 - 추후 요청 과정에서 Next.js는 데이터 재요청을 시도할 것입니다.
+
+## Styling
+
+### CSS Modules
+
+- `.module.css` 확장자를 사용하여 CSS Modules를 지원한다.
+
+- CSS Modules는 유일 클래스 네임을 자동으로 생성하여 지역적인 CSS 범위를 구축한다.
+
+#### Ex.
+
+| app/dashboard/layout.tsx
+
+```
+import styles from './styles.module.css'
+
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return <section className={styles.dashboard}>{children}</section>
+}
+```
+
+| app/dashboard/styles.module.css
+
+```
+.dashboard {
+  padding: 24px;
+}
+```
+
+- 배포 버전에서 CSS Module 파일은 자동으로 축소되고 코드 분할된 css 파일로 연결됩니다.
+
+### Global Styles
+
+* 앱 디렉토리 내부 어느 레이아웃, 페이지 혹은 컴포넌트에 임포트 될 수 있습니다.
+
+#### 사용 방법
+
+* app/global.css 파일 생성.
+
+* 파일에 임포트
+
+| app/layout.tsx
+```
+// These styles apply to every route in the application
+import './global.css'
+ 
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  )
+}
+```
+
+### External Stylesheets
+
+* 욉 페키지로부터 임포트된 스타일시트도 어디서든 임포트 될 수 있습니다.
+
+- 사용 방법
+```
+import 'bootstrap/dist/css/bootstrap.css'
+ 
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <html lang="en">
+      <body className="container">{children}</body>
+    </html>
+  )
+}
+```
+
